@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Users, Wallet, CalendarCheck, LogOut, Menu, Sparkles, Brain } from "lucide-react";
+import { LayoutDashboard, Users, Wallet, CalendarCheck, LogOut, Menu, Sparkles, Brain, Building2, GraduationCap, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -13,13 +13,17 @@ export const Route = createFileRoute("/admin")({
   component: AdminLayout,
 });
 
-type NavItem = { to: "/admin" | "/admin/people" | "/admin/fees" | "/admin/attendance" | "/admin/ai"; label: string; icon: typeof LayoutDashboard; exact?: boolean; badge?: string };
+type NavTo = "/admin" | "/admin/people" | "/admin/fees" | "/admin/attendance" | "/admin/ai" | "/admin/onboard" | "/admin/admissions" | "/admin/staff";
+type NavItem = { to: NavTo; label: string; icon: typeof LayoutDashboard; exact?: boolean; badge?: string; group?: string };
 const NAV: NavItem[] = [
   { to: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
   { to: "/admin/people", label: "Students & Staff", icon: Users },
   { to: "/admin/fees", label: "Fees", icon: Wallet },
   { to: "/admin/attendance", label: "Attendance", icon: CalendarCheck },
   { to: "/admin/ai", label: "Prabandh Q AI", icon: Brain, badge: "Premium" },
+  { to: "/admin/onboard", label: "Institute Onboarding", icon: Building2, group: "Forms" },
+  { to: "/admin/admissions", label: "New Admission", icon: GraduationCap, group: "Forms" },
+  { to: "/admin/staff", label: "Add Teacher / Staff", icon: UserPlus, group: "Forms" },
 ];
 
 function SidebarContent({ onNav }: { onNav?: () => void }) {

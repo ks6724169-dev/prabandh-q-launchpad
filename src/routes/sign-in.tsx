@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Logo } from "@/components/site-nav";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/sign-in")({
   head: () => ({
@@ -18,11 +19,67 @@ export const Route = createFileRoute("/sign-in")({
   component: SignIn,
 });
 
+type UserRole = "admin" | "teacher" | "staff" | "student";
+
 function SignIn() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [selectedRole, setSelectedRole] = useState<UserRole | "">("admin");
+
+  const getRolePath = (role: UserRole): string => {
+    const paths: Record<UserRole, string> = {
+      admin: "/admin",
+      teacher: "/teacher",
+      staff: "/staff",
+      student: "/student",
+    };
+    return paths[role];
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!selectedRole) {
+      toast.error("Please select your role");
+      return;
+    }
+
+    setLoading(true);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    
+    if (error || !data.user) {
+      setLoading(false);
+      toast.error(error?.message ?? "Could not sign in.");
+      return;
+    }
+
+    // Hydrate user data with role
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("institute_id, full_name")
+      .eq("id", data.user.id)
+      .maybeSingle();
+
+    if (profile?.institute_id) {
+      const { data: inst } = await supabase
+        .from("institutes")
+        .select("id, name, type")
+        .eq("id", profile.institute_id)
+        .maybeSingle();
+      if (inst && typeof window !== "undefined") {
+        window.localStorage.setItem("pq_institute_id", inst.id);
+        window.localStorage.setItem("pq_institute_type", inst.type);
+        window.localStorage.setItem("pq_institute_name", inst.name);
+        window.localStorage.setItem("pq_user_role", selectedRole);
+      }
+    }
+
+    setLoading(false);
+    toast.success(`Welcome to ${selectedRole} dashboard.`);
+    navigate({ to: getRolePath(selectedRole as UserRole) });
+  };
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
@@ -45,51 +102,53 @@ function SignIn() {
         <div className="mx-auto my-auto w-full max-w-md">
           <Card className="bg-gradient-card p-8 shadow-soft">
             <h1 className="text-2xl font-bold">Sign in to Prabandh Q</h1>
-            <p className="mt-1.5 text-sm text-muted-foreground">Use your institute admin credentials.</p>
+            <p className="mt-1.5 text-sm text-muted-foreground">Select your role and enter your credentials.</p>
 
-            <form
-              className="mt-7 space-y-4"
-              onSubmit={async (e) => {
-                e.preventDefault();
-                setLoading(true);
-                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                if (error || !data.user) {
-                  setLoading(false);
-                  toast.error(error?.message ?? "Could not sign in.");
-                  return;
-                }
-                // Hydrate tenant info from profile + institute
-                const { data: profile } = await supabase
-                  .from("profiles")
-                  .select("institute_id, full_name")
-                  .eq("id", data.user.id)
-                  .maybeSingle();
-                if (profile?.institute_id) {
-                  const { data: inst } = await supabase
-                    .from("institutes")
-                    .select("id, name, type")
-                    .eq("id", profile.institute_id)
-                    .maybeSingle();
-                  if (inst && typeof window !== "undefined") {
-                    window.localStorage.setItem("pq_institute_id", inst.id);
-                    window.localStorage.setItem("pq_institute_type", inst.type);
-                    window.localStorage.setItem("pq_institute_name", inst.name);
-                  }
-                }
-                setLoading(false);
-                toast.success("Welcome back to Prabandh Q.");
-                navigate({ to: "/admin" });
-              }}
-            >
+            <form className="mt-7 space-y-4" onSubmit={handleSubmit}>
+              <div className="space-y-1.5">
+                <Label htmlFor="role">Select Your Role</Label>
+                <Select value={selectedRole} onValueChange={(value) => setSelectedRole(value as UserRole)}>
+                  <SelectTrigger id="role">
+                    <SelectValue placeholder="Choose your role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="teacher">Teacher</SelectItem>
+                    <SelectItem value="staff">Staff</SelectItem>
+                    <SelectItem value="student">Student</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="space-y-1.5">
                 <Label htmlFor="email">Work email</Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="principal@yourinstitute.edu.in" required />
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@institute.edu.in"
+                  required
+                />
               </div>
+
               <div className="space-y-1.5">
                 <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                />
               </div>
-              <Button type="submit" disabled={loading} className="w-full bg-gradient-hero text-primary-foreground shadow-soft hover:opacity-95">
+
+              <Button
+                type="submit"
+                disabled={loading || !selectedRole}
+                className="w-full bg-gradient-hero text-primary-foreground shadow-soft hover:opacity-95"
+              >
                 {loading ? "Signing in…" : "Sign in"}
               </Button>
             </form>

@@ -20,51 +20,46 @@ export const Route = createFileRoute("/")({
 });
 
 type Sector = "school" | "college";
+type Tier = "Silver" | "Gold" | "Platinum";
 
-const plans: Record<Sector, { tier: string; price: string; capacity: string[]; highlight?: boolean; perks: string[] }[]> = {
-  school: [
-    {
-      tier: "Silver",
-      price: "₹8,000",
-      capacity: ["Up to 100", "Up to 200", "Up to 500", "Up to 1000"],
-      perks: ["Core admin tools", "Attendance & timetable", "Parent SMS alerts", "Mobile app access"],
+const inr = (n: number) => "₹" + n.toLocaleString("en-IN");
+
+const priceMatrix: Record<Sector, { capacities: number[]; prices: Record<number, Record<Tier, number>> }> = {
+  school: {
+    capacities: [100, 200, 500, 1000],
+    prices: {
+      100: { Silver: 8000, Gold: 12000, Platinum: 18000 },
+      200: { Silver: 14000, Gold: 20000, Platinum: 28000 },
+      500: { Silver: 25000, Gold: 35000, Platinum: 45000 },
+      1000: { Silver: 40000, Gold: 55000, Platinum: 70000 },
     },
-    {
-      tier: "Gold",
-      price: "₹16,000",
-      highlight: true,
-      capacity: ["Up to 100", "Up to 200", "Up to 500", "Up to 1000"],
-      perks: ["Everything in Silver", "Fees & accounting", "Exam & report cards", "Teacher app", "Priority support"],
+  },
+  college: {
+    capacities: [100, 200, 300, 500, 1000],
+    prices: {
+      100: { Silver: 25000, Gold: 35000, Platinum: 50000 },
+      200: { Silver: 40000, Gold: 55000, Platinum: 75000 },
+      300: { Silver: 55000, Gold: 75000, Platinum: 100000 },
+      500: { Silver: 80000, Gold: 110000, Platinum: 150000 },
+      1000: { Silver: 150000, Gold: 200000, Platinum: 280000 },
     },
-    {
-      tier: "Platinum",
-      price: "₹28,000",
-      capacity: ["Up to 100", "Up to 200", "Up to 500", "Up to 1000"],
-      perks: ["Everything in Gold", "Multi-branch dashboards", "Transport & hostel", "Custom integrations", "Dedicated manager"],
-    },
-  ],
-  college: [
-    {
-      tier: "Silver",
-      price: "₹25,000",
-      capacity: ["Up to 100", "Up to 200", "Up to 300", "Up to 500", "Up to 1000"],
-      perks: ["Admissions CRM", "Course & batch mgmt", "Attendance & ID cards", "Mobile app"],
-    },
-    {
-      tier: "Gold",
-      price: "₹45,000",
-      highlight: true,
-      capacity: ["Up to 100", "Up to 200", "Up to 300", "Up to 500", "Up to 1000"],
-      perks: ["Everything in Silver", "Examination engine", "Fees, scholarships, refunds", "Placement cell", "Faculty workload"],
-    },
-    {
-      tier: "Platinum",
-      price: "₹75,000",
-      capacity: ["Up to 100", "Up to 200", "Up to 300", "Up to 500", "Up to 1000"],
-      perks: ["Everything in Gold", "Research & grants", "NAAC/NIRF reports", "API access", "On-site onboarding"],
-    },
-  ],
+  },
 };
+
+const tierPerks: Record<Sector, Record<Tier, string[]>> = {
+  school: {
+    Silver: ["Core admin tools", "Attendance & timetable", "Parent SMS alerts", "Mobile app access"],
+    Gold: ["Everything in Silver", "Fees & accounting", "Exam & report cards", "Teacher app", "Priority support"],
+    Platinum: ["Everything in Gold", "Multi-branch dashboards", "Transport & hostel", "Custom integrations", "Dedicated manager"],
+  },
+  college: {
+    Silver: ["Admissions CRM", "Course & batch mgmt", "Attendance & ID cards", "Mobile app"],
+    Gold: ["Everything in Silver", "Examination engine", "Fees, scholarships, refunds", "Placement cell", "Faculty workload"],
+    Platinum: ["Everything in Gold", "Research & grants", "NAAC/NIRF reports", "API access", "On-site onboarding"],
+  },
+};
+
+const tierOrder: Tier[] = ["Silver", "Gold", "Platinum"];
 
 const features = [
   { icon: ShieldCheck, title: "Core Admin Suite", desc: "Admissions, attendance, fees, exams, timetable, and HR — beautifully unified." },
@@ -77,6 +72,18 @@ const features = [
 
 function LandingPage() {
   const [sector, setSector] = useState<Sector>("school");
+  const [capacity, setCapacity] = useState<number>(100);
+
+  const capacities = priceMatrix[sector].capacities;
+  const activeCapacity = capacities.includes(capacity) ? capacity : capacities[0];
+  const currentPrices = priceMatrix[sector].prices[activeCapacity];
+
+  const handleSectorChange = (s: Sector) => {
+    setSector(s);
+    if (!priceMatrix[s].capacities.includes(capacity)) {
+      setCapacity(priceMatrix[s].capacities[0]);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -175,7 +182,7 @@ function LandingPage() {
             return (
               <button
                 key={s}
-                onClick={() => setSector(s)}
+                onClick={() => handleSectorChange(s)}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all sm:flex-none ${
                   active
                     ? "bg-gradient-hero text-primary-foreground shadow-soft"
@@ -191,59 +198,76 @@ function LandingPage() {
 
         <p className="mt-4 text-center text-sm text-muted-foreground">
           {sector === "school"
-            ? "Starting from ₹8,000/year · capacity tiers from 100 to 1000 students"
-            : "Starting from ₹25,000/year · capacity tiers from 100 to 1000 students"}
+            ? "Plans start at ₹8,000/year · capacity tiers from 100 to 1000 students"
+            : "Plans start at ₹25,000/year · capacity tiers from 100 to 1000 students"}
         </p>
 
-        <div className="mt-10 grid gap-6 lg:grid-cols-3">
-          {plans[sector].map((p) => (
-            <Card
-              key={p.tier}
-              className={`relative flex flex-col p-7 transition-all ${
-                p.highlight
-                  ? "border-primary/40 bg-gradient-card shadow-elegant ring-1 ring-primary/20"
-                  : "bg-gradient-card hover:shadow-soft"
-              }`}
-            >
-              {p.highlight && (
-                <Badge className="absolute -top-3 left-7 bg-gradient-emerald text-primary-foreground">Most Popular</Badge>
-              )}
-              <div className="flex items-baseline justify-between">
-                <h3 className="text-xl font-bold">{p.tier}</h3>
-                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{sector}</span>
-              </div>
-              <div className="mt-4">
-                <span className="text-4xl font-extrabold tracking-tight">{p.price}</span>
-                <span className="ml-1 text-sm text-muted-foreground">/ year onwards</span>
-              </div>
-
-              <div className="mt-5">
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Student capacity tiers</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {p.capacity.map((c) => (
-                    <span key={c} className="rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">{c}</span>
-                  ))}
-                </div>
-              </div>
-
-              <ul className="mt-6 space-y-2.5 text-sm">
-                {p.perks.map((perk) => (
-                  <li key={perk} className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent-emerald" />
-                    <span className="text-foreground/90">{perk}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Button
-                asChild
-                className={`mt-7 w-full ${p.highlight ? "bg-gradient-hero text-primary-foreground shadow-soft hover:opacity-95" : ""}`}
-                variant={p.highlight ? "default" : "outline"}
+        {/* Capacity selector */}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
+          <span className="mr-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Student capacity:</span>
+          {capacities.map((c) => {
+            const active = c === activeCapacity;
+            return (
+              <button
+                key={c}
+                onClick={() => setCapacity(c)}
+                className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition-all ${
+                  active
+                    ? "border-primary bg-primary text-primary-foreground shadow-soft"
+                    : "border-border bg-secondary/60 text-muted-foreground hover:text-foreground"
+                }`}
               >
-                <Link to="/register">Choose {p.tier}</Link>
-              </Button>
-            </Card>
-          ))}
+                Up to {c}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-10 grid gap-6 lg:grid-cols-3">
+          {tierOrder.map((tier) => {
+            const highlight = tier === "Gold";
+            const perks = tierPerks[sector][tier];
+            return (
+              <Card
+                key={tier}
+                className={`relative flex flex-col p-7 transition-all ${
+                  highlight
+                    ? "border-primary/40 bg-gradient-card shadow-elegant ring-1 ring-primary/20"
+                    : "bg-gradient-card hover:shadow-soft"
+                }`}
+              >
+                {highlight && (
+                  <Badge className="absolute -top-3 left-7 bg-gradient-emerald text-primary-foreground">Most Popular</Badge>
+                )}
+                <div className="flex items-baseline justify-between">
+                  <h3 className="text-xl font-bold">{tier}</h3>
+                  <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{sector}</span>
+                </div>
+                <div className="mt-4">
+                  <span className="text-4xl font-extrabold tracking-tight">{inr(currentPrices[tier])}</span>
+                  <span className="ml-1 text-sm text-muted-foreground">/ year</span>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">For up to {activeCapacity} students</p>
+
+                <ul className="mt-6 space-y-2.5 text-sm">
+                  {perks.map((perk) => (
+                    <li key={perk} className="flex items-start gap-2">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent-emerald" />
+                      <span className="text-foreground/90">{perk}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Button
+                  asChild
+                  className={`mt-7 w-full ${highlight ? "bg-gradient-hero text-primary-foreground shadow-soft hover:opacity-95" : ""}`}
+                  variant={highlight ? "default" : "outline"}
+                >
+                  <Link to="/register">Choose {tier}</Link>
+                </Button>
+              </Card>
+            );
+          })}
         </div>
       </section>
 

@@ -20,51 +20,46 @@ export const Route = createFileRoute("/")({
 });
 
 type Sector = "school" | "college";
+type Tier = "Silver" | "Gold" | "Platinum";
 
-const plans: Record<Sector, { tier: string; price: string; capacity: string[]; highlight?: boolean; perks: string[] }[]> = {
-  school: [
-    {
-      tier: "Silver",
-      price: "₹8,000",
-      capacity: ["Up to 100", "Up to 200", "Up to 500", "Up to 1000"],
-      perks: ["Core admin tools", "Attendance & timetable", "Parent SMS alerts", "Mobile app access"],
+const inr = (n: number) => "₹" + n.toLocaleString("en-IN");
+
+const priceMatrix: Record<Sector, { capacities: number[]; prices: Record<number, Record<Tier, number>> }> = {
+  school: {
+    capacities: [100, 200, 500, 1000],
+    prices: {
+      100: { Silver: 8000, Gold: 12000, Platinum: 18000 },
+      200: { Silver: 14000, Gold: 20000, Platinum: 28000 },
+      500: { Silver: 25000, Gold: 35000, Platinum: 45000 },
+      1000: { Silver: 40000, Gold: 55000, Platinum: 70000 },
     },
-    {
-      tier: "Gold",
-      price: "₹16,000",
-      highlight: true,
-      capacity: ["Up to 100", "Up to 200", "Up to 500", "Up to 1000"],
-      perks: ["Everything in Silver", "Fees & accounting", "Exam & report cards", "Teacher app", "Priority support"],
+  },
+  college: {
+    capacities: [100, 200, 300, 500, 1000],
+    prices: {
+      100: { Silver: 25000, Gold: 35000, Platinum: 50000 },
+      200: { Silver: 40000, Gold: 55000, Platinum: 75000 },
+      300: { Silver: 55000, Gold: 75000, Platinum: 100000 },
+      500: { Silver: 80000, Gold: 110000, Platinum: 150000 },
+      1000: { Silver: 150000, Gold: 200000, Platinum: 280000 },
     },
-    {
-      tier: "Platinum",
-      price: "₹28,000",
-      capacity: ["Up to 100", "Up to 200", "Up to 500", "Up to 1000"],
-      perks: ["Everything in Gold", "Multi-branch dashboards", "Transport & hostel", "Custom integrations", "Dedicated manager"],
-    },
-  ],
-  college: [
-    {
-      tier: "Silver",
-      price: "₹25,000",
-      capacity: ["Up to 100", "Up to 200", "Up to 300", "Up to 500", "Up to 1000"],
-      perks: ["Admissions CRM", "Course & batch mgmt", "Attendance & ID cards", "Mobile app"],
-    },
-    {
-      tier: "Gold",
-      price: "₹45,000",
-      highlight: true,
-      capacity: ["Up to 100", "Up to 200", "Up to 300", "Up to 500", "Up to 1000"],
-      perks: ["Everything in Silver", "Examination engine", "Fees, scholarships, refunds", "Placement cell", "Faculty workload"],
-    },
-    {
-      tier: "Platinum",
-      price: "₹75,000",
-      capacity: ["Up to 100", "Up to 200", "Up to 300", "Up to 500", "Up to 1000"],
-      perks: ["Everything in Gold", "Research & grants", "NAAC/NIRF reports", "API access", "On-site onboarding"],
-    },
-  ],
+  },
 };
+
+const tierPerks: Record<Sector, Record<Tier, string[]>> = {
+  school: {
+    Silver: ["Core admin tools", "Attendance & timetable", "Parent SMS alerts", "Mobile app access"],
+    Gold: ["Everything in Silver", "Fees & accounting", "Exam & report cards", "Teacher app", "Priority support"],
+    Platinum: ["Everything in Gold", "Multi-branch dashboards", "Transport & hostel", "Custom integrations", "Dedicated manager"],
+  },
+  college: {
+    Silver: ["Admissions CRM", "Course & batch mgmt", "Attendance & ID cards", "Mobile app"],
+    Gold: ["Everything in Silver", "Examination engine", "Fees, scholarships, refunds", "Placement cell", "Faculty workload"],
+    Platinum: ["Everything in Gold", "Research & grants", "NAAC/NIRF reports", "API access", "On-site onboarding"],
+  },
+};
+
+const tierOrder: Tier[] = ["Silver", "Gold", "Platinum"];
 
 const features = [
   { icon: ShieldCheck, title: "Core Admin Suite", desc: "Admissions, attendance, fees, exams, timetable, and HR — beautifully unified." },

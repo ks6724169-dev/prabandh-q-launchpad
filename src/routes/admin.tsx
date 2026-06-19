@@ -1,9 +1,11 @@
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Users, Wallet, CalendarCheck, LogOut, Menu, Sparkles } from "lucide-react";
+import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import { LayoutDashboard, Users, Wallet, CalendarCheck, LogOut, Menu, Sparkles, Brain } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { TenantProvider, useTenant } from "@/components/tenant";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin")({
@@ -11,12 +13,13 @@ export const Route = createFileRoute("/admin")({
   component: AdminLayout,
 });
 
-type NavItem = { to: "/admin" | "/admin/people" | "/admin/fees" | "/admin/attendance"; label: string; icon: typeof LayoutDashboard; exact?: boolean };
+type NavItem = { to: "/admin" | "/admin/people" | "/admin/fees" | "/admin/attendance" | "/admin/ai"; label: string; icon: typeof LayoutDashboard; exact?: boolean; badge?: string };
 const NAV: NavItem[] = [
   { to: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
   { to: "/admin/people", label: "Students & Staff", icon: Users },
   { to: "/admin/fees", label: "Fees", icon: Wallet },
   { to: "/admin/attendance", label: "Attendance", icon: CalendarCheck },
+  { to: "/admin/ai", label: "Prabandh Q AI", icon: Brain, badge: "Premium" },
 ];
 
 function SidebarContent({ onNav }: { onNav?: () => void }) {
@@ -59,22 +62,51 @@ function SidebarContent({ onNav }: { onNav?: () => void }) {
               )}
             >
               <Icon className="h-4 w-4" />
-              {item.label}
+              <span className="flex-1">{item.label}</span>
+              {item.badge && (
+                <span className={cn(
+                  "rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider",
+                  active ? "bg-white/20 text-primary-foreground" : "bg-primary/10 text-primary"
+                )}>
+                  {item.badge}
+                </span>
+              )}
             </Link>
           );
         })}
       </nav>
 
       <div className="border-t border-border/60 p-3">
-        <Link
-          to="/"
-          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-        >
-          <LogOut className="h-4 w-4" />
-          Exit Dashboard
-        </Link>
+        <LogoutButton onNav={onNav} />
       </div>
     </div>
+  );
+}
+
+function LogoutButton({ onNav }: { onNav?: () => void }) {
+  const navigate = useNavigate();
+  const [busy, setBusy] = useState(false);
+  return (
+    <button
+      disabled={busy}
+      onClick={async () => {
+        setBusy(true);
+        await supabase.auth.signOut();
+        if (typeof window !== "undefined") {
+          window.localStorage.removeItem("pq_institute_id");
+          window.localStorage.removeItem("pq_institute_type");
+          window.localStorage.removeItem("pq_institute_name");
+          window.localStorage.removeItem("pq_is_ai_premium");
+        }
+        toast.success("Signed out successfully.");
+        onNav?.();
+        navigate({ to: "/" });
+      }}
+      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
+    >
+      <LogOut className="h-4 w-4" />
+      {busy ? "Signing out…" : "Log out"}
+    </button>
   );
 }
 

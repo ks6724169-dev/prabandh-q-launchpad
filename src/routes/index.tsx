@@ -72,6 +72,18 @@ const features = [
 
 function LandingPage() {
   const [sector, setSector] = useState<Sector>("school");
+  const [capacity, setCapacity] = useState<number>(100);
+
+  const capacities = priceMatrix[sector].capacities;
+  const activeCapacity = capacities.includes(capacity) ? capacity : capacities[0];
+  const currentPrices = priceMatrix[sector].prices[activeCapacity];
+
+  const handleSectorChange = (s: Sector) => {
+    setSector(s);
+    if (!priceMatrix[s].capacities.includes(capacity)) {
+      setCapacity(priceMatrix[s].capacities[0]);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">

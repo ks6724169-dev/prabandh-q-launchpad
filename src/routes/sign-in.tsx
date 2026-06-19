@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Logo } from "@/components/site-nav";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/sign-in")({
   head: () => ({
@@ -18,10 +19,13 @@ export const Route = createFileRoute("/sign-in")({
 });
 
 function SignIn() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
-      {/* Left visual */}
       <div className="relative hidden overflow-hidden bg-gradient-hero p-12 text-primary-foreground lg:flex lg:flex-col lg:justify-between">
         <div className="absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
         <div className="absolute -right-20 top-10 h-72 w-72 rounded-full bg-accent-emerald/20 blur-3xl" />
@@ -35,11 +39,8 @@ function SignIn() {
         <p className="relative text-xs text-primary-foreground/70">© {new Date().getFullYear()} Prabandh Q</p>
       </div>
 
-      {/* Right form */}
       <div className="flex flex-col px-6 py-10 sm:px-10">
-        <div className="lg:hidden">
-          <Logo />
-        </div>
+        <div className="lg:hidden"><Logo /></div>
 
         <div className="mx-auto my-auto w-full max-w-md">
           <Card className="bg-gradient-card p-8 shadow-soft">
@@ -48,25 +49,45 @@ function SignIn() {
 
             <form
               className="mt-7 space-y-4"
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
                 setLoading(true);
-                setTimeout(() => {
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error || !data.user) {
                   setLoading(false);
-                  toast.success("Signed in (demo). Auth backend coming next.");
-                }, 700);
+                  toast.error(error?.message ?? "Could not sign in.");
+                  return;
+                }
+                // Hydrate tenant info from profile + institute
+                const { data: profile } = await supabase
+                  .from("profiles")
+                  .select("institute_id, full_name")
+                  .eq("id", data.user.id)
+                  .maybeSingle();
+                if (profile?.institute_id) {
+                  const { data: inst } = await supabase
+                    .from("institutes")
+                    .select("id, name, type")
+                    .eq("id", profile.institute_id)
+                    .maybeSingle();
+                  if (inst && typeof window !== "undefined") {
+                    window.localStorage.setItem("pq_institute_id", inst.id);
+                    window.localStorage.setItem("pq_institute_type", inst.type);
+                    window.localStorage.setItem("pq_institute_name", inst.name);
+                  }
+                }
+                setLoading(false);
+                toast.success("Welcome back to Prabandh Q.");
+                navigate({ to: "/admin" });
               }}
             >
               <div className="space-y-1.5">
                 <Label htmlFor="email">Work email</Label>
-                <Input id="email" type="email" placeholder="principal@yourinstitute.edu.in" required />
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="principal@yourinstitute.edu.in" required />
               </div>
               <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
-                  <a className="text-xs font-medium text-primary hover:underline" href="#">Forgot?</a>
-                </div>
-                <Input id="password" type="password" placeholder="••••••••" required />
+                <Label htmlFor="password">Password</Label>
+                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
               </div>
               <Button type="submit" disabled={loading} className="w-full bg-gradient-hero text-primary-foreground shadow-soft hover:opacity-95">
                 {loading ? "Signing in…" : "Sign in"}

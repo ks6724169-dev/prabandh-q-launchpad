@@ -198,59 +198,76 @@ function LandingPage() {
 
         <p className="mt-4 text-center text-sm text-muted-foreground">
           {sector === "school"
-            ? "Starting from ₹8,000/year · capacity tiers from 100 to 1000 students"
-            : "Starting from ₹25,000/year · capacity tiers from 100 to 1000 students"}
+            ? "Plans start at ₹8,000/year · capacity tiers from 100 to 1000 students"
+            : "Plans start at ₹25,000/year · capacity tiers from 100 to 1000 students"}
         </p>
 
-        <div className="mt-10 grid gap-6 lg:grid-cols-3">
-          {plans[sector].map((p) => (
-            <Card
-              key={p.tier}
-              className={`relative flex flex-col p-7 transition-all ${
-                p.highlight
-                  ? "border-primary/40 bg-gradient-card shadow-elegant ring-1 ring-primary/20"
-                  : "bg-gradient-card hover:shadow-soft"
-              }`}
-            >
-              {p.highlight && (
-                <Badge className="absolute -top-3 left-7 bg-gradient-emerald text-primary-foreground">Most Popular</Badge>
-              )}
-              <div className="flex items-baseline justify-between">
-                <h3 className="text-xl font-bold">{p.tier}</h3>
-                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{sector}</span>
-              </div>
-              <div className="mt-4">
-                <span className="text-4xl font-extrabold tracking-tight">{p.price}</span>
-                <span className="ml-1 text-sm text-muted-foreground">/ year onwards</span>
-              </div>
-
-              <div className="mt-5">
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Student capacity tiers</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {p.capacity.map((c) => (
-                    <span key={c} className="rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">{c}</span>
-                  ))}
-                </div>
-              </div>
-
-              <ul className="mt-6 space-y-2.5 text-sm">
-                {p.perks.map((perk) => (
-                  <li key={perk} className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent-emerald" />
-                    <span className="text-foreground/90">{perk}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Button
-                asChild
-                className={`mt-7 w-full ${p.highlight ? "bg-gradient-hero text-primary-foreground shadow-soft hover:opacity-95" : ""}`}
-                variant={p.highlight ? "default" : "outline"}
+        {/* Capacity selector */}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
+          <span className="mr-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Student capacity:</span>
+          {capacities.map((c) => {
+            const active = c === activeCapacity;
+            return (
+              <button
+                key={c}
+                onClick={() => setCapacity(c)}
+                className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition-all ${
+                  active
+                    ? "border-primary bg-primary text-primary-foreground shadow-soft"
+                    : "border-border bg-secondary/60 text-muted-foreground hover:text-foreground"
+                }`}
               >
-                <Link to="/register">Choose {p.tier}</Link>
-              </Button>
-            </Card>
-          ))}
+                Up to {c}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-10 grid gap-6 lg:grid-cols-3">
+          {tierOrder.map((tier) => {
+            const highlight = tier === "Gold";
+            const perks = tierPerks[sector][tier];
+            return (
+              <Card
+                key={tier}
+                className={`relative flex flex-col p-7 transition-all ${
+                  highlight
+                    ? "border-primary/40 bg-gradient-card shadow-elegant ring-1 ring-primary/20"
+                    : "bg-gradient-card hover:shadow-soft"
+                }`}
+              >
+                {highlight && (
+                  <Badge className="absolute -top-3 left-7 bg-gradient-emerald text-primary-foreground">Most Popular</Badge>
+                )}
+                <div className="flex items-baseline justify-between">
+                  <h3 className="text-xl font-bold">{tier}</h3>
+                  <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{sector}</span>
+                </div>
+                <div className="mt-4">
+                  <span className="text-4xl font-extrabold tracking-tight">{inr(currentPrices[tier])}</span>
+                  <span className="ml-1 text-sm text-muted-foreground">/ year</span>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">For up to {activeCapacity} students</p>
+
+                <ul className="mt-6 space-y-2.5 text-sm">
+                  {perks.map((perk) => (
+                    <li key={perk} className="flex items-start gap-2">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent-emerald" />
+                      <span className="text-foreground/90">{perk}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Button
+                  asChild
+                  className={`mt-7 w-full ${highlight ? "bg-gradient-hero text-primary-foreground shadow-soft hover:opacity-95" : ""}`}
+                  variant={highlight ? "default" : "outline"}
+                >
+                  <Link to="/register">Choose {tier}</Link>
+                </Button>
+              </Card>
+            );
+          })}
         </div>
       </section>
 

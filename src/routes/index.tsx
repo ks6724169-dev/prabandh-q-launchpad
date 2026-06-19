@@ -182,7 +182,7 @@ function LandingPage() {
             return (
               <button
                 key={s}
-                onClick={() => setSector(s)}
+                onClick={() => handleSectorChange(s)}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all sm:flex-none ${
                   active
                     ? "bg-gradient-hero text-primary-foreground shadow-soft"

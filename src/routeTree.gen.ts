@@ -11,7 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminPeopleRouteImport } from './routes/admin.people'
+import { Route as AdminFeesRouteImport } from './routes/admin.fees'
+import { Route as AdminAttendanceRouteImport } from './routes/admin.attendance'
 
 const SignInRoute = SignInRouteImport.update({
   id: '/sign-in',
@@ -23,38 +28,102 @@ const RegisterRoute = RegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPeopleRoute = AdminPeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFeesRoute = AdminFeesRouteImport.update({
+  id: '/fees',
+  path: '/fees',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAttendanceRoute = AdminAttendanceRouteImport.update({
+  id: '/attendance',
+  path: '/attendance',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/register': typeof RegisterRoute
   '/sign-in': typeof SignInRoute
+  '/admin/attendance': typeof AdminAttendanceRoute
+  '/admin/fees': typeof AdminFeesRoute
+  '/admin/people': typeof AdminPeopleRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/register': typeof RegisterRoute
   '/sign-in': typeof SignInRoute
+  '/admin/attendance': typeof AdminAttendanceRoute
+  '/admin/fees': typeof AdminFeesRoute
+  '/admin/people': typeof AdminPeopleRoute
+  '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/register': typeof RegisterRoute
   '/sign-in': typeof SignInRoute
+  '/admin/attendance': typeof AdminAttendanceRoute
+  '/admin/fees': typeof AdminFeesRoute
+  '/admin/people': typeof AdminPeopleRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/register' | '/sign-in'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/register'
+    | '/sign-in'
+    | '/admin/attendance'
+    | '/admin/fees'
+    | '/admin/people'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/register' | '/sign-in'
-  id: '__root__' | '/' | '/register' | '/sign-in'
+  to:
+    | '/'
+    | '/register'
+    | '/sign-in'
+    | '/admin/attendance'
+    | '/admin/fees'
+    | '/admin/people'
+    | '/admin'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/register'
+    | '/sign-in'
+    | '/admin/attendance'
+    | '/admin/fees'
+    | '/admin/people'
+    | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   RegisterRoute: typeof RegisterRoute
   SignInRoute: typeof SignInRoute
 }
@@ -75,6 +144,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -82,11 +158,56 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/people': {
+      id: '/admin/people'
+      path: '/people'
+      fullPath: '/admin/people'
+      preLoaderRoute: typeof AdminPeopleRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/fees': {
+      id: '/admin/fees'
+      path: '/fees'
+      fullPath: '/admin/fees'
+      preLoaderRoute: typeof AdminFeesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/attendance': {
+      id: '/admin/attendance'
+      path: '/attendance'
+      fullPath: '/admin/attendance'
+      preLoaderRoute: typeof AdminAttendanceRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
+interface AdminRouteChildren {
+  AdminAttendanceRoute: typeof AdminAttendanceRoute
+  AdminFeesRoute: typeof AdminFeesRoute
+  AdminPeopleRoute: typeof AdminPeopleRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAttendanceRoute: AdminAttendanceRoute,
+  AdminFeesRoute: AdminFeesRoute,
+  AdminPeopleRoute: AdminPeopleRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   RegisterRoute: RegisterRoute,
   SignInRoute: SignInRoute,
 }

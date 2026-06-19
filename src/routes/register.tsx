@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import {
 import { Logo } from "@/components/site-nav";
 import { toast } from "sonner";
 import { Check } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/register")({
   head: () => ({
@@ -22,13 +23,16 @@ export const Route = createFileRoute("/register")({
 });
 
 function Register() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [name, setName] = useState("");
+  const [contactPerson, setContactPerson] = useState("");
+  const [email, setEmail] = useState("");
   const [type, setType] = useState<string>("");
   const [tier, setTier] = useState<string>("");
 
   return (
     <div className="grid min-h-screen lg:grid-cols-[1fr_1.1fr]">
-      {/* Left visual */}
       <div className="relative hidden overflow-hidden bg-gradient-hero p-12 text-primary-foreground lg:flex lg:flex-col lg:justify-between">
         <div className="absolute -bottom-32 -right-20 h-80 w-80 rounded-full bg-accent-emerald/20 blur-3xl" />
         <div className="absolute -left-20 top-10 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
@@ -36,7 +40,7 @@ function Register() {
         <div className="relative max-w-md">
           <h2 className="font-display text-3xl font-extrabold leading-tight">Onboard your institute in minutes.</h2>
           <p className="mt-3 text-sm text-primary-foreground/85">
-            Tell us a little about your school or college and pick a tier. Our team configures your secure tenant within 24 hours.
+            Tell us a little about your school or college and pick a tier. Your tenant dashboard is configured instantly.
           </p>
           <ul className="mt-6 space-y-2.5 text-sm">
             {[
@@ -54,11 +58,8 @@ function Register() {
         <p className="relative text-xs text-primary-foreground/70">© {new Date().getFullYear()} Prabandh Q</p>
       </div>
 
-      {/* Right form */}
       <div className="flex flex-col px-6 py-10 sm:px-10">
-        <div className="lg:hidden">
-          <Logo />
-        </div>
+        <div className="lg:hidden"><Logo /></div>
 
         <div className="mx-auto my-auto w-full max-w-xl">
           <Card className="bg-gradient-card p-8 shadow-soft">
@@ -67,22 +68,41 @@ function Register() {
 
             <form
               className="mt-7 space-y-4"
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
                 if (!type || !tier) {
                   toast.error("Please choose an institute type and preferred plan tier.");
                   return;
                 }
                 setLoading(true);
-                setTimeout(() => {
-                  setLoading(false);
-                  toast.success("Request received! Our team will reach out shortly.");
-                }, 800);
+                const { data, error } = await supabase
+                  .from("institutes")
+                  .insert({
+                    name,
+                    type,
+                    preferred_plan: tier,
+                    contact_person: contactPerson,
+                    contact_email: email,
+                  })
+                  .select("id, type, name")
+                  .single();
+                setLoading(false);
+                if (error || !data) {
+                  toast.error(error?.message ?? "Could not complete registration.");
+                  return;
+                }
+                if (typeof window !== "undefined") {
+                  window.localStorage.setItem("pq_institute_id", data.id);
+                  window.localStorage.setItem("pq_institute_type", data.type);
+                  window.localStorage.setItem("pq_institute_name", data.name);
+                }
+                toast.success("Registration Successful! Prabandh Q is configuring your tenant dashboard.");
+                setTimeout(() => navigate({ to: "/admin" }), 700);
               }}
             >
               <div className="space-y-1.5">
                 <Label htmlFor="institute">Institute name</Label>
-                <Input id="institute" placeholder="e.g. Saraswati Public School" required />
+                <Input id="institute" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Saraswati Public School" required />
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
@@ -111,12 +131,12 @@ function Register() {
 
               <div className="space-y-1.5">
                 <Label htmlFor="contact">Contact person</Label>
-                <Input id="contact" placeholder="Full name" required />
+                <Input id="contact" value={contactPerson} onChange={(e) => setContactPerson(e.target.value)} placeholder="Full name" required />
               </div>
 
               <div className="space-y-1.5">
                 <Label htmlFor="email">Work email</Label>
-                <Input id="email" type="email" placeholder="admin@yourinstitute.edu.in" required />
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@yourinstitute.edu.in" required />
               </div>
 
               <Button type="submit" disabled={loading} className="w-full bg-gradient-hero text-primary-foreground shadow-soft hover:opacity-95">

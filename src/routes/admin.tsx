@@ -49,36 +49,44 @@ function SidebarContent({ onNav }: { onNav?: () => void }) {
         </div>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3">
-        {NAV.map((item) => {
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3 pb-3">
+        {NAV.map((item, idx) => {
           const active = item.exact ? path === item.to : path.startsWith(item.to);
           const Icon = item.icon;
+          const showGroup = item.group && (idx === 0 || NAV[idx - 1].group !== item.group);
           return (
-            <Link
-              key={item.to}
-              to={item.to}
-              onClick={onNav}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
-                active
-                  ? "bg-gradient-hero text-primary-foreground shadow-soft"
-                  : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+            <div key={item.to}>
+              {showGroup && (
+                <p className="mb-1 mt-3 px-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
+                  {item.group}
+                </p>
               )}
-            >
-              <Icon className="h-4 w-4" />
-              <span className="flex-1">{item.label}</span>
-              {item.badge && (
-                <span className={cn(
-                  "rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider",
-                  active ? "bg-white/20 text-primary-foreground" : "bg-primary/10 text-primary"
-                )}>
-                  {item.badge}
-                </span>
-              )}
-            </Link>
+              <Link
+                to={item.to}
+                onClick={onNav}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
+                  active
+                    ? "bg-gradient-hero text-primary-foreground shadow-soft"
+                    : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                )}
+              >
+                <Icon className="h-4 w-4" />
+                <span className="flex-1">{item.label}</span>
+                {item.badge && (
+                  <span className={cn(
+                    "rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider",
+                    active ? "bg-white/20 text-primary-foreground" : "bg-primary/10 text-primary"
+                  )}>
+                    {item.badge}
+                  </span>
+                )}
+              </Link>
+            </div>
           );
         })}
       </nav>
+
 
       <div className="border-t border-border/60 p-3">
         <LogoutButton onNav={onNav} />

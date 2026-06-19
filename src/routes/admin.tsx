@@ -11,12 +11,13 @@ export const Route = createFileRoute("/admin")({
   component: AdminLayout,
 });
 
-const NAV = [
+type NavItem = { to: "/admin" | "/admin/people" | "/admin/fees" | "/admin/attendance"; label: string; icon: typeof LayoutDashboard; exact?: boolean };
+const NAV: NavItem[] = [
   { to: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
   { to: "/admin/people", label: "Students & Staff", icon: Users },
   { to: "/admin/fees", label: "Fees", icon: Wallet },
   { to: "/admin/attendance", label: "Attendance", icon: CalendarCheck },
-] as const;
+];
 
 function SidebarContent({ onNav }: { onNav?: () => void }) {
   const tenant = useTenant();

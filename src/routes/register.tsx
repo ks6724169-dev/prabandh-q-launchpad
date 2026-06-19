@@ -28,6 +28,7 @@ function Register() {
   const [name, setName] = useState("");
   const [contactPerson, setContactPerson] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [type, setType] = useState<string>("");
   const [tier, setTier] = useState<string>("");
 
@@ -74,8 +75,12 @@ function Register() {
                   toast.error("Please choose an institute type and preferred plan tier.");
                   return;
                 }
+                if (password.length < 8) {
+                  toast.error("Password must be at least 8 characters.");
+                  return;
+                }
                 setLoading(true);
-                const { data, error } = await supabase
+                const { data: inst, error: instErr } = await supabase
                   .from("institutes")
                   .insert({
                     name,
@@ -86,17 +91,34 @@ function Register() {
                   })
                   .select("id, type, name")
                   .single();
+                if (instErr || !inst) {
+                  setLoading(false);
+                  toast.error(instErr?.message ?? "Could not complete registration.");
+                  return;
+                }
+                const { error: authErr } = await supabase.auth.signUp({
+                  email,
+                  password,
+                  options: {
+                    emailRedirectTo: `${window.location.origin}/admin`,
+                    data: {
+                      full_name: contactPerson,
+                      institute_id: inst.id,
+                      role: "admin",
+                    },
+                  },
+                });
                 setLoading(false);
-                if (error || !data) {
-                  toast.error(error?.message ?? "Could not complete registration.");
+                if (authErr) {
+                  toast.error(authErr.message);
                   return;
                 }
                 if (typeof window !== "undefined") {
-                  window.localStorage.setItem("pq_institute_id", data.id);
-                  window.localStorage.setItem("pq_institute_type", data.type);
-                  window.localStorage.setItem("pq_institute_name", data.name);
+                  window.localStorage.setItem("pq_institute_id", inst.id);
+                  window.localStorage.setItem("pq_institute_type", inst.type);
+                  window.localStorage.setItem("pq_institute_name", inst.name);
                 }
-                toast.success("Registration Successful! Prabandh Q is configuring your tenant dashboard.");
+                toast.success("Registration successful! Your tenant dashboard is ready.");
                 setTimeout(() => navigate({ to: "/admin" }), 700);
               }}
             >
@@ -137,6 +159,11 @@ function Register() {
               <div className="space-y-1.5">
                 <Label htmlFor="email">Work email</Label>
                 <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@yourinstitute.edu.in" required />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="password">Password</Label>
+                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" minLength={8} required />
               </div>
 
               <Button type="submit" disabled={loading} className="w-full bg-gradient-hero text-primary-foreground shadow-soft hover:opacity-95">

@@ -1,278 +1,225 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
+  }
   public: {
     Tables: {
-      user_roles: {
+      institutes: {
         Row: {
-          id: string
-          user_id: string
-          role: "admin" | "teacher" | "staff" | "student"
-          institute_id: string | null
+          contact_email: string
+          contact_person: string | null
           created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          role?: "admin" | "teacher" | "staff" | "student"
-          institute_id?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          role?: "admin" | "teacher" | "staff" | "student"
-          institute_id?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      student_attendance_records: {
-        Row: {
           id: string
-          student_id: string
-          institute_id: string
-          date: string
-          status: "present" | "absent" | "holiday" | "leave"
-          course_semester_id: string | null
-          subject: string | null
-          marked_by: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          student_id: string
-          institute_id: string
-          date: string
-          status?: "present" | "absent" | "holiday" | "leave"
-          course_semester_id?: string | null
-          subject?: string | null
-          marked_by?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          student_id?: string
-          institute_id?: string
-          date?: string
-          status?: "present" | "absent" | "holiday" | "leave"
-          course_semester_id?: string | null
-          subject?: string | null
-          marked_by?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      fee_transactions_receipts: {
-        Row: {
-          id: string
-          student_id: string
-          institute_id: string
-          amount_paid: number
-          pending_dues: number
-          payment_mode: "cash" | "bank_transfer" | "upi" | "card" | "cheque"
-          receipt_url: string | null
-          receipt_number: string
-          academic_month: string | null
-          notes: string | null
-          recorded_by: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          student_id: string
-          institute_id: string
-          amount_paid: number
-          pending_dues?: number
-          payment_mode: "cash" | "bank_transfer" | "upi" | "card" | "cheque"
-          receipt_url?: string | null
-          receipt_number?: string
-          academic_month?: string | null
-          notes?: string | null
-          recorded_by?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          student_id?: string
-          institute_id?: string
-          amount_paid?: number
-          pending_dues?: number
-          payment_mode?: "cash" | "bank_transfer" | "upi" | "card" | "cheque"
-          receipt_url?: string | null
-          receipt_number?: string
-          academic_month?: string | null
-          notes?: string | null
-          recorded_by?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      teacher_timetables: {
-        Row: {
-          id: string
-          teacher_id: string
-          institute_id: string
-          day: string
-          time_slot: string
-          subject: string
-          class_room: string
-          class_name: string | null
-          student_count: number
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          teacher_id: string
-          institute_id: string
-          day: string
-          time_slot: string
-          subject: string
-          class_room: string
-          class_name?: string | null
-          student_count?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          teacher_id?: string
-          institute_id?: string
-          day?: string
-          time_slot?: string
-          subject?: string
-          class_room?: string
-          class_name?: string | null
-          student_count?: number
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      complaints_inquiries: {
-        Row: {
-          id: string
-          user_id: string
-          institute_id: string
+          name: string
+          preferred_plan: string
+          student_capacity: string | null
           type: string
-          title: string
-          description: string
-          status: "open" | "in_progress" | "resolved" | "closed"
-          priority: "low" | "medium" | "high" | "urgent"
-          assigned_to: string | null
-          resolution_notes: string | null
-          created_at: string
-          updated_at: string
-          resolved_at: string | null
         }
         Insert: {
-          id?: string
-          user_id: string
-          institute_id: string
-          type: string
-          title: string
-          description: string
-          status?: "open" | "in_progress" | "resolved" | "closed"
-          priority?: "low" | "medium" | "high" | "urgent"
-          assigned_to?: string | null
-          resolution_notes?: string | null
+          contact_email: string
+          contact_person?: string | null
           created_at?: string
-          updated_at?: string
-          resolved_at?: string | null
+          id?: string
+          name: string
+          preferred_plan: string
+          student_capacity?: string | null
+          type: string
         }
         Update: {
+          contact_email?: string
+          contact_person?: string | null
+          created_at?: string
           id?: string
-          user_id?: string
-          institute_id?: string
+          name?: string
+          preferred_plan?: string
+          student_capacity?: string | null
           type?: string
-          title?: string
-          description?: string
-          status?: "open" | "in_progress" | "resolved" | "closed"
-          priority?: "low" | "medium" | "high" | "urgent"
-          assigned_to?: string | null
-          resolution_notes?: string | null
-          created_at?: string
-          updated_at?: string
-          resolved_at?: string | null
         }
+        Relationships: []
       }
-      ai_credit_management: {
+      profiles: {
         Row: {
-          id: string
-          user_id: string
-          institute_id: string
-          available_credits: number
-          total_credits_purchased: number
-          is_premium_unlocked: boolean
-          premium_unlock_date: string | null
-          last_session_date: string | null
-          total_sessions: number
           created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          institute_id: string | null
+          role: string
           updated_at: string
         }
         Insert: {
-          id?: string
-          user_id: string
-          institute_id: string
-          available_credits?: number
-          total_credits_purchased?: number
-          is_premium_unlocked?: boolean
-          premium_unlock_date?: string | null
-          last_session_date?: string | null
-          total_sessions?: number
           created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          institute_id?: string
-          available_credits?: number
-          total_credits_purchased?: number
-          is_premium_unlocked?: boolean
-          premium_unlock_date?: string | null
-          last_session_date?: string | null
-          total_sessions?: number
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      ai_session_history: {
-        Row: {
+          email?: string | null
+          full_name?: string | null
           id: string
-          user_id: string
-          institute_id: string
-          topic: string
-          credits_used: number
-          session_duration_minutes: number | null
-          is_premium_topic: boolean
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          institute_id: string
-          topic: string
-          credits_used: number
-          session_duration_minutes?: number | null
-          is_premium_topic?: boolean
-          created_at?: string
+          institute_id?: string | null
+          role?: string
+          updated_at?: string
         }
         Update: {
-          id?: string
-          user_id?: string
-          institute_id?: string
-          topic?: string
-          credits_used?: number
-          session_duration_minutes?: number | null
-          is_premium_topic?: boolean
           created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          institute_id?: string | null
+          role?: string
+          updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_institute_id_fkey"
+            columns: ["institute_id"]
+            isOneToOne: false
+            referencedRelation: "institutes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const

@@ -31,10 +31,13 @@ import { Route as StaffComplaintsRouteImport } from './routes/staff.complaints'
 import { Route as AdminStaffRouteImport } from './routes/admin.staff'
 import { Route as AdminPeopleRouteImport } from './routes/admin.people'
 import { Route as AdminOnboardRouteImport } from './routes/admin.onboard'
+import { Route as AdminModulesRouteImport } from './routes/admin.modules'
 import { Route as AdminFeesRouteImport } from './routes/admin.fees'
 import { Route as AdminAttendanceRouteImport } from './routes/admin.attendance'
 import { Route as AdminAiRouteImport } from './routes/admin.ai'
 import { Route as AdminAdmissionsRouteImport } from './routes/admin.admissions'
+import { Route as AdminModulesIndexRouteImport } from './routes/admin.modules.index'
+import { Route as AdminModulesSlugRouteImport } from './routes/admin.modules.$slug'
 
 const TeacherRoute = TeacherRouteImport.update({
   id: '/teacher',
@@ -146,6 +149,11 @@ const AdminOnboardRoute = AdminOnboardRouteImport.update({
   path: '/onboard',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminModulesRoute = AdminModulesRouteImport.update({
+  id: '/modules',
+  path: '/modules',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminFeesRoute = AdminFeesRouteImport.update({
   id: '/fees',
   path: '/fees',
@@ -166,6 +174,16 @@ const AdminAdmissionsRoute = AdminAdmissionsRouteImport.update({
   path: '/admissions',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminModulesIndexRoute = AdminModulesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminModulesRoute,
+} as any)
+const AdminModulesSlugRoute = AdminModulesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => AdminModulesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -179,6 +197,7 @@ export interface FileRoutesByFullPath {
   '/admin/ai': typeof AdminAiRoute
   '/admin/attendance': typeof AdminAttendanceRoute
   '/admin/fees': typeof AdminFeesRoute
+  '/admin/modules': typeof AdminModulesRouteWithChildren
   '/admin/onboard': typeof AdminOnboardRoute
   '/admin/people': typeof AdminPeopleRoute
   '/admin/staff': typeof AdminStaffRoute
@@ -194,6 +213,8 @@ export interface FileRoutesByFullPath {
   '/staff/': typeof StaffIndexRoute
   '/student/': typeof StudentIndexRoute
   '/teacher/': typeof TeacherIndexRoute
+  '/admin/modules/$slug': typeof AdminModulesSlugRoute
+  '/admin/modules/': typeof AdminModulesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -218,6 +239,8 @@ export interface FileRoutesByTo {
   '/staff': typeof StaffIndexRoute
   '/student': typeof StudentIndexRoute
   '/teacher': typeof TeacherIndexRoute
+  '/admin/modules/$slug': typeof AdminModulesSlugRoute
+  '/admin/modules': typeof AdminModulesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -232,6 +255,7 @@ export interface FileRoutesById {
   '/admin/ai': typeof AdminAiRoute
   '/admin/attendance': typeof AdminAttendanceRoute
   '/admin/fees': typeof AdminFeesRoute
+  '/admin/modules': typeof AdminModulesRouteWithChildren
   '/admin/onboard': typeof AdminOnboardRoute
   '/admin/people': typeof AdminPeopleRoute
   '/admin/staff': typeof AdminStaffRoute
@@ -247,6 +271,8 @@ export interface FileRoutesById {
   '/staff/': typeof StaffIndexRoute
   '/student/': typeof StudentIndexRoute
   '/teacher/': typeof TeacherIndexRoute
+  '/admin/modules/$slug': typeof AdminModulesSlugRoute
+  '/admin/modules/': typeof AdminModulesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -262,6 +288,7 @@ export interface FileRouteTypes {
     | '/admin/ai'
     | '/admin/attendance'
     | '/admin/fees'
+    | '/admin/modules'
     | '/admin/onboard'
     | '/admin/people'
     | '/admin/staff'
@@ -277,6 +304,8 @@ export interface FileRouteTypes {
     | '/staff/'
     | '/student/'
     | '/teacher/'
+    | '/admin/modules/$slug'
+    | '/admin/modules/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -301,6 +330,8 @@ export interface FileRouteTypes {
     | '/staff'
     | '/student'
     | '/teacher'
+    | '/admin/modules/$slug'
+    | '/admin/modules'
   id:
     | '__root__'
     | '/'
@@ -314,6 +345,7 @@ export interface FileRouteTypes {
     | '/admin/ai'
     | '/admin/attendance'
     | '/admin/fees'
+    | '/admin/modules'
     | '/admin/onboard'
     | '/admin/people'
     | '/admin/staff'
@@ -329,6 +361,8 @@ export interface FileRouteTypes {
     | '/staff/'
     | '/student/'
     | '/teacher/'
+    | '/admin/modules/$slug'
+    | '/admin/modules/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -497,6 +531,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminOnboardRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/modules': {
+      id: '/admin/modules'
+      path: '/modules'
+      fullPath: '/admin/modules'
+      preLoaderRoute: typeof AdminModulesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/fees': {
       id: '/admin/fees'
       path: '/fees'
@@ -525,14 +566,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdmissionsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/modules/': {
+      id: '/admin/modules/'
+      path: '/'
+      fullPath: '/admin/modules/'
+      preLoaderRoute: typeof AdminModulesIndexRouteImport
+      parentRoute: typeof AdminModulesRoute
+    }
+    '/admin/modules/$slug': {
+      id: '/admin/modules/$slug'
+      path: '/$slug'
+      fullPath: '/admin/modules/$slug'
+      preLoaderRoute: typeof AdminModulesSlugRouteImport
+      parentRoute: typeof AdminModulesRoute
+    }
   }
 }
+
+interface AdminModulesRouteChildren {
+  AdminModulesSlugRoute: typeof AdminModulesSlugRoute
+  AdminModulesIndexRoute: typeof AdminModulesIndexRoute
+}
+
+const AdminModulesRouteChildren: AdminModulesRouteChildren = {
+  AdminModulesSlugRoute: AdminModulesSlugRoute,
+  AdminModulesIndexRoute: AdminModulesIndexRoute,
+}
+
+const AdminModulesRouteWithChildren = AdminModulesRoute._addFileChildren(
+  AdminModulesRouteChildren,
+)
 
 interface AdminRouteChildren {
   AdminAdmissionsRoute: typeof AdminAdmissionsRoute
   AdminAiRoute: typeof AdminAiRoute
   AdminAttendanceRoute: typeof AdminAttendanceRoute
   AdminFeesRoute: typeof AdminFeesRoute
+  AdminModulesRoute: typeof AdminModulesRouteWithChildren
   AdminOnboardRoute: typeof AdminOnboardRoute
   AdminPeopleRoute: typeof AdminPeopleRoute
   AdminStaffRoute: typeof AdminStaffRoute
@@ -544,6 +614,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAiRoute: AdminAiRoute,
   AdminAttendanceRoute: AdminAttendanceRoute,
   AdminFeesRoute: AdminFeesRoute,
+  AdminModulesRoute: AdminModulesRouteWithChildren,
   AdminOnboardRoute: AdminOnboardRoute,
   AdminPeopleRoute: AdminPeopleRoute,
   AdminStaffRoute: AdminStaffRoute,

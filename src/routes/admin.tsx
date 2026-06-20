@@ -13,7 +13,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminLayout,
 });
 
-type NavTo = "/admin" | "/admin/people" | "/admin/fees" | "/admin/attendance" | "/admin/ai" | "/admin/onboard" | "/admin/admissions" | "/admin/staff";
+type NavTo = "/admin" | "/admin/people" | "/admin/fees" | "/admin/attendance" | "/admin/ai" | "/admin/onboard" | "/admin/admissions" | "/admin/staff" | "/admin/modules";
 type NavItem = { to: NavTo; label: string; icon: typeof LayoutDashboard; exact?: boolean; badge?: string; group?: string };
 const NAV: NavItem[] = [
   { to: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
@@ -21,6 +21,7 @@ const NAV: NavItem[] = [
   { to: "/admin/fees", label: "Fees", icon: Wallet },
   { to: "/admin/attendance", label: "Attendance", icon: CalendarCheck },
   { to: "/admin/ai", label: "Prabandh Q AI", icon: Brain, badge: "Premium" },
+  { to: "/admin/modules", label: "All Modules", icon: Building2, badge: "30" },
   { to: "/admin/onboard", label: "Institute Onboarding", icon: Building2, group: "Forms" },
   { to: "/admin/admissions", label: "New Admission", icon: GraduationCap, group: "Forms" },
   { to: "/admin/staff", label: "Add Teacher / Staff", icon: UserPlus, group: "Forms" },

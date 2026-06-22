@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { LayoutDashboard, Users, Wallet, CalendarCheck, LogOut, Menu, Sparkles, Brain, Building2, GraduationCap, UserPlus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { TenantProvider, useTenant } from "@/components/tenant";
@@ -167,8 +167,15 @@ function AdminLayout() {
 }
 
 function useTenantWrap() {
-  // Header needs tenant name but it's rendered above TenantProvider's children.
-  // Read localStorage directly for the header label (SSR-safe).
-  if (typeof window === "undefined") return "Dashboard";
-  return window.localStorage.getItem("pq_institute_name") || "Demo Institute";
+  // Header needs tenant name but is rendered above TenantProvider's children.
+  // Must return same value on SSR and first client render to avoid hydration
+  // mismatch — only read localStorage after mount.
+  const [name, setName] = useState<string>("Demo Institute");
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem("pq_institute_name");
+    if (stored) setName(stored);
+  }, []);
+  return name;
 }
+

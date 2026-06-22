@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,7 +34,24 @@ export function FunctionalModule({
 }: {
   icon: LucideIcon; title: string; subtitle: string; number: number; schema: ModuleSchema;
 }) {
-  const [rows, setRows] = useState<Record<string, any>[]>(() => schema.seed.map((s, i) => ({ id: `r-${i}`, ...s })));
+  // Defensive: schema may be missing/partial during HMR or slug mismatch.
+  const safeSchema: ModuleSchema = {
+    noun: schema?.noun ?? "Record",
+    fields: schema?.fields ?? [],
+    columns: schema?.columns ?? [],
+    searchKey: schema?.searchKey ?? "name",
+    filterKey: schema?.filterKey,
+    stats: schema?.stats ?? [],
+    seed: schema?.seed ?? [],
+  };
+
+  // Start empty on SSR to avoid hydration mismatch (seed uses Math.random / Date).
+  const [rows, setRows] = useState<Record<string, any>[]>([]);
+  useEffect(() => {
+    setRows(safeSchema.seed.map((s, i) => ({ id: `r-${i}`, ...s })));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [schema]);
+
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<string>("__all");
   const [open, setOpen] = useState(false);
@@ -42,32 +59,32 @@ export function FunctionalModule({
   const [aiOpen, setAiOpen] = useState(false);
 
   const filterOptions = useMemo(() => {
-    if (!schema.filterKey) return [];
-    return Array.from(new Set(rows.map((r) => String(r[schema.filterKey!] ?? "")))).filter(Boolean);
-  }, [rows, schema.filterKey]);
+    if (!safeSchema.filterKey) return [];
+    return Array.from(new Set(rows.map((r) => String(r[safeSchema.filterKey!] ?? "")))).filter(Boolean);
+  }, [rows, safeSchema.filterKey]);
 
   const filtered = useMemo(() => {
     return rows.filter((r) => {
-      const matchesSearch = !search || String(r[schema.searchKey] ?? "").toLowerCase().includes(search.toLowerCase());
-      const matchesFilter = filter === "__all" || !schema.filterKey || String(r[schema.filterKey]) === filter;
+      const matchesSearch = !search || String(r[safeSchema.searchKey] ?? "").toLowerCase().includes(search.toLowerCase());
+      const matchesFilter = filter === "__all" || !safeSchema.filterKey || String(r[safeSchema.filterKey]) === filter;
       return matchesSearch && matchesFilter;
     });
   }, [rows, search, filter, schema]);
 
-  const stats = useMemo(() => schema.stats.map((s) => ({ ...s, value: s.compute(rows) })), [rows, schema]);
+  const stats = useMemo(() => safeSchema.stats.map((s) => ({ ...s, value: s.compute(rows) })), [rows, schema]);
 
   const submit = () => {
-    for (const f of schema.fields) {
+    for (const f of safeSchema.fields) {
       if (f.required && !form[f.key]) { toast.error(`${f.label} is required`); return; }
     }
     setRows((prev) => [{ id: `r-${Date.now()}`, ...form }, ...prev]);
     setForm({}); setOpen(false);
-    toast.success(`${schema.noun} added`);
+    toast.success(`${safeSchema.noun} added`);
   };
 
   const remove = (id: string) => {
     setRows((prev) => prev.filter((r) => r.id !== id));
-    toast.success(`${schema.noun} removed`);
+    toast.success(`${safeSchema.noun} removed`);
   };
 
   const runAI = () => {
@@ -115,13 +132,13 @@ export function FunctionalModule({
           <div className="flex flex-1 flex-col gap-2 sm:flex-row">
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`Search by ${schema.searchKey}…`} className="pl-9" />
+              <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`Search by ${safeSchema.searchKey}…`} className="pl-9" />
             </div>
-            {schema.filterKey && (
+            {safeSchema.filterKey && (
               <Select value={filter} onValueChange={setFilter}>
-                <SelectTrigger className="w-full sm:w-48"><SelectValue placeholder={`Filter by ${schema.filterKey}`} /></SelectTrigger>
+                <SelectTrigger className="w-full sm:w-48"><SelectValue placeholder={`Filter by ${safeSchema.filterKey}`} /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__all">All {schema.filterKey}</SelectItem>
+                  <SelectItem value="__all">All {safeSchema.filterKey}</SelectItem>
                   {filterOptions.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -134,14 +151,14 @@ export function FunctionalModule({
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-gradient-hero text-primary-foreground shadow-soft hover:opacity-95">
-                  <Plus className="mr-1 h-4 w-4" /> New {schema.noun}
+                  <Plus className="mr-1 h-4 w-4" /> New {safeSchema.noun}
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-lg">
-                <DialogHeader><DialogTitle>Add {schema.noun}</DialogTitle></DialogHeader>
+                <DialogHeader><DialogTitle>Add {safeSchema.noun}</DialogTitle></DialogHeader>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {schema.fields.map((f) => (
-                    <div key={f.key} className={`space-y-1.5 ${f.type === "text" && schema.fields.length <= 4 ? "sm:col-span-2" : ""}`}>
+                  {safeSchema.fields.map((f) => (
+                    <div key={f.key} className={`space-y-1.5 ${f.type === "text" && safeSchema.fields.length <= 4 ? "sm:col-span-2" : ""}`}>
                       <Label>{f.label}{f.required && <span className="text-rose-500"> *</span>}</Label>
                       {f.type === "select" ? (
                         <Select value={form[f.key] ?? ""} onValueChange={(v) => setForm({ ...form, [f.key]: v })}>
@@ -163,7 +180,7 @@ export function FunctionalModule({
                 </div>
                 <DialogFooter>
                   <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
-                  <Button onClick={submit} className="bg-gradient-hero text-primary-foreground">Save {schema.noun}</Button>
+                  <Button onClick={submit} className="bg-gradient-hero text-primary-foreground">Save {safeSchema.noun}</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -177,16 +194,16 @@ export function FunctionalModule({
           <Table>
             <TableHeader>
               <TableRow>
-                {schema.columns.map((c) => <TableHead key={c} className="capitalize">{c.replace(/([A-Z])/g, " $1")}</TableHead>)}
+                {safeSchema.columns.map((c) => <TableHead key={c} className="capitalize">{c.replace(/([A-Z])/g, " $1")}</TableHead>)}
                 <TableHead className="w-12 text-right">·</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={schema.columns.length + 1} className="py-10 text-center text-sm text-muted-foreground">No records match.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={safeSchema.columns.length + 1} className="py-10 text-center text-sm text-muted-foreground">No records match.</TableCell></TableRow>
               ) : filtered.map((row) => (
                 <TableRow key={row.id}>
-                  {schema.columns.map((c) => {
+                  {safeSchema.columns.map((c) => {
                     const v = row[c];
                     const isStatusLike = ["status","stage","state","severity","type"].includes(c);
                     return (
@@ -213,7 +230,7 @@ export function FunctionalModule({
         </div>
         <div className="flex items-center justify-between border-t border-border/60 p-3 text-xs text-muted-foreground">
           <span>Showing {filtered.length} of {rows.length}</span>
-          <span className="font-mono">{schema.noun} · Demo</span>
+          <span className="font-mono">{safeSchema.noun} · Demo</span>
         </div>
       </Card>
 
@@ -224,7 +241,7 @@ export function FunctionalModule({
             <DialogTitle className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> AI Insights</DialogTitle>
           </DialogHeader>
           <div className="space-y-2 text-sm">
-            <p className="text-muted-foreground">Based on {rows.length} {schema.noun.toLowerCase()} records:</p>
+            <p className="text-muted-foreground">Based on {rows.length} {safeSchema.noun.toLowerCase()} records:</p>
             <ul className="space-y-1.5 rounded-lg bg-muted/40 p-3">
               {stats.slice(0, 3).map((s) => (
                 <li key={s.label} className="flex justify-between"><span>{s.label}</span><span className="font-semibold">{s.value}</span></li>

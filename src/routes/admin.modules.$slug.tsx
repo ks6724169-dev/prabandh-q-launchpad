@@ -12,11 +12,8 @@ export const Route = createFileRoute("/admin/modules/$slug")({
     const mod = MODULE_BY_SLUG[params.slug];
     return { meta: [{ title: `${mod?.title ?? "Module"} · Prabandh Q` }] };
   },
-  loader: ({ params }) => {
-    const mod = MODULE_BY_SLUG[params.slug];
-    if (!mod) throw notFound();
-    return { mod };
-  },
+  // No loader — `icon` is a React component (function) and isn't serializable
+  // for SSR dehydration. Look up the module in the component instead.
   errorComponent: ({ error }) => (
     <div className="p-6 text-sm text-destructive">Failed to load module: {String(error)}</div>
   ),
@@ -27,9 +24,21 @@ export const Route = createFileRoute("/admin/modules/$slug")({
 });
 
 function ModulePage() {
-  const { mod } = Route.useLoaderData();
+  const { slug } = Route.useParams();
+  const mod = MODULE_BY_SLUG[slug];
 
-  // Modules with dedicated full screens elsewhere — redirect cards
+  if (!mod) {
+    return (
+      <div className="space-y-4">
+        <Link to="/admin/modules" className="text-xs font-semibold text-primary hover:underline">← All Modules</Link>
+        <Card className="bg-gradient-card p-8 text-center shadow-soft">
+          <h1 className="font-display text-xl font-extrabold">Module not found</h1>
+          <p className="mt-2 text-sm text-muted-foreground">The module "{slug}" does not exist.</p>
+        </Card>
+      </div>
+    );
+  }
+
   const aliases: Record<string, { to: string; label: string }> = {
     "dashboard": { to: "/admin", label: "Open Dashboard" },
     "fees-mgmt": { to: "/admin/fees", label: "Open Fee Management" },

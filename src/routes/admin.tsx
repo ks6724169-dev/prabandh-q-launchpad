@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { LayoutDashboard, Users, Wallet, CalendarCheck, LogOut, Menu, Sparkles, Brain, Building2, GraduationCap, UserPlus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { TenantProvider, useTenant } from "@/components/tenant";

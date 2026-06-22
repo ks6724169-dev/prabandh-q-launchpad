@@ -34,7 +34,24 @@ export function FunctionalModule({
 }: {
   icon: LucideIcon; title: string; subtitle: string; number: number; schema: ModuleSchema;
 }) {
-  const [rows, setRows] = useState<Record<string, any>[]>(() => schema.seed.map((s, i) => ({ id: `r-${i}`, ...s })));
+  // Defensive: schema may be missing/partial during HMR or slug mismatch.
+  const safeSchema: ModuleSchema = {
+    noun: schema?.noun ?? "Record",
+    fields: schema?.fields ?? [],
+    columns: schema?.columns ?? [],
+    searchKey: schema?.searchKey ?? "name",
+    filterKey: schema?.filterKey,
+    stats: schema?.stats ?? [],
+    seed: schema?.seed ?? [],
+  };
+
+  // Start empty on SSR to avoid hydration mismatch (seed uses Math.random / Date).
+  const [rows, setRows] = useState<Record<string, any>[]>([]);
+  useEffect(() => {
+    setRows(safeSchema.seed.map((s, i) => ({ id: `r-${i}`, ...s })));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [schema]);
+
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<string>("__all");
   const [open, setOpen] = useState(false);

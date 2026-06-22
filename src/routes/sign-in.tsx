@@ -228,11 +228,6 @@ function SignIn() {
               New institute?{" "}
               <Link to="/register" className="font-semibold text-primary hover:underline">Register here</Link>
             </p>
-
-            <p className="mt-6 text-center text-sm text-muted-foreground">
-              New institute?{" "}
-              <Link to="/register" className="font-semibold text-primary hover:underline">Register here</Link>
-            </p>
           </Card>
           <p className="mt-6 text-center text-xs text-muted-foreground">
             <Link to="/" className="hover:text-foreground">← Back to home</Link>

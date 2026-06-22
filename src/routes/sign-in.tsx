@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Logo } from "@/components/site-nav";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/sign-in")({
@@ -81,6 +82,54 @@ function SignIn() {
     navigate({ to: getRolePath(selectedRole as UserRole) });
   };
 
+  const handleGoogle = async () => {
+    if (!selectedRole) {
+      toast.error("Please select your role first");
+      return;
+    }
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("pq_pending_role", selectedRole);
+    }
+    setLoading(true);
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin + "/sign-in",
+    });
+    if (result.error) {
+      setLoading(false);
+      toast.error("Google sign-in failed. Please try again.");
+      return;
+    }
+    if (result.redirected) return;
+    // Tokens already set — finish locally
+    await finishGoogleSignIn();
+  };
+
+  const finishGoogleSignIn = async () => {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return;
+    const pendingRole =
+      (typeof window !== "undefined" && (window.localStorage.getItem("pq_pending_role") as UserRole)) ||
+      "admin";
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("pq_user_role", pendingRole);
+      window.localStorage.removeItem("pq_pending_role");
+    }
+    setLoading(false);
+    toast.success(`Welcome to ${pendingRole} dashboard.`);
+    navigate({ to: getRolePath(pendingRole) });
+  };
+
+  useEffect(() => {
+    // Handle returning from Google OAuth redirect
+    if (typeof window === "undefined") return;
+    const pending = window.localStorage.getItem("pq_pending_role");
+    if (!pending) return;
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) finishGoogleSignIn();
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <div className="relative hidden overflow-hidden bg-gradient-hero p-12 text-primary-foreground lg:flex lg:flex-col lg:justify-between">
@@ -152,6 +201,28 @@ function SignIn() {
                 {loading ? "Signing in…" : "Sign in"}
               </Button>
             </form>
+
+            <div className="my-5 flex items-center gap-3">
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-xs uppercase tracking-wider text-muted-foreground">or</span>
+              <div className="h-px flex-1 bg-border" />
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleGoogle}
+              disabled={loading || !selectedRole}
+              className="w-full gap-2"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 48 48" aria-hidden="true">
+                <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.5 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.1 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.3-.4-3.5z"/>
+                <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.1 7 29.3 4.9 24 4.9c-7.7 0-14.4 4.4-17.7 10.8z"/>
+                <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.3 35 26.8 36 24 36c-5.3 0-9.7-3.4-11.3-8.1l-6.5 5C9.5 39.6 16.2 44 24 44z"/>
+                <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.6l6.2 5.2C40.9 35.8 44 30.3 44 24c0-1.2-.1-2.3-.4-3.5z"/>
+              </svg>
+              Continue with Google (Free)
+            </Button>
 
             <p className="mt-6 text-center text-sm text-muted-foreground">
               New institute?{" "}

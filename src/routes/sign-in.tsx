@@ -82,6 +82,54 @@ function SignIn() {
     navigate({ to: getRolePath(selectedRole as UserRole) });
   };
 
+  const handleGoogle = async () => {
+    if (!selectedRole) {
+      toast.error("Please select your role first");
+      return;
+    }
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("pq_pending_role", selectedRole);
+    }
+    setLoading(true);
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin + "/sign-in",
+    });
+    if (result.error) {
+      setLoading(false);
+      toast.error("Google sign-in failed. Please try again.");
+      return;
+    }
+    if (result.redirected) return;
+    // Tokens already set — finish locally
+    await finishGoogleSignIn();
+  };
+
+  const finishGoogleSignIn = async () => {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return;
+    const pendingRole =
+      (typeof window !== "undefined" && (window.localStorage.getItem("pq_pending_role") as UserRole)) ||
+      "admin";
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("pq_user_role", pendingRole);
+      window.localStorage.removeItem("pq_pending_role");
+    }
+    setLoading(false);
+    toast.success(`Welcome to ${pendingRole} dashboard.`);
+    navigate({ to: getRolePath(pendingRole) });
+  };
+
+  useEffect(() => {
+    // Handle returning from Google OAuth redirect
+    if (typeof window === "undefined") return;
+    const pending = window.localStorage.getItem("pq_pending_role");
+    if (!pending) return;
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) finishGoogleSignIn();
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <div className="relative hidden overflow-hidden bg-gradient-hero p-12 text-primary-foreground lg:flex lg:flex-col lg:justify-between">

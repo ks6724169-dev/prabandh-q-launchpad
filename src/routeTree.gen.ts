@@ -20,6 +20,7 @@ import { Route as TeacherIndexRouteImport } from './routes/teacher.index'
 import { Route as StudentIndexRouteImport } from './routes/student.index'
 import { Route as StaffIndexRouteImport } from './routes/staff.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as TeacherModulesRouteImport } from './routes/teacher.modules'
 import { Route as TeacherDirectoryRouteImport } from './routes/teacher.directory'
 import { Route as TeacherClassesRouteImport } from './routes/teacher.classes'
 import { Route as TeacherAttendanceRouteImport } from './routes/teacher.attendance'
@@ -36,7 +37,9 @@ import { Route as AdminFeesRouteImport } from './routes/admin.fees'
 import { Route as AdminAttendanceRouteImport } from './routes/admin.attendance'
 import { Route as AdminAiRouteImport } from './routes/admin.ai'
 import { Route as AdminAdmissionsRouteImport } from './routes/admin.admissions'
+import { Route as TeacherModulesIndexRouteImport } from './routes/teacher.modules.index'
 import { Route as AdminModulesIndexRouteImport } from './routes/admin.modules.index'
+import { Route as TeacherModulesSlugRouteImport } from './routes/teacher.modules.$slug'
 import { Route as AdminModulesSlugRouteImport } from './routes/admin.modules.$slug'
 
 const TeacherRoute = TeacherRouteImport.update({
@@ -93,6 +96,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const TeacherModulesRoute = TeacherModulesRouteImport.update({
+  id: '/modules',
+  path: '/modules',
+  getParentRoute: () => TeacherRoute,
 } as any)
 const TeacherDirectoryRoute = TeacherDirectoryRouteImport.update({
   id: '/directory',
@@ -174,10 +182,20 @@ const AdminAdmissionsRoute = AdminAdmissionsRouteImport.update({
   path: '/admissions',
   getParentRoute: () => AdminRoute,
 } as any)
+const TeacherModulesIndexRoute = TeacherModulesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TeacherModulesRoute,
+} as any)
 const AdminModulesIndexRoute = AdminModulesIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminModulesRoute,
+} as any)
+const TeacherModulesSlugRoute = TeacherModulesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => TeacherModulesRoute,
 } as any)
 const AdminModulesSlugRoute = AdminModulesSlugRouteImport.update({
   id: '/$slug',
@@ -209,12 +227,15 @@ export interface FileRoutesByFullPath {
   '/teacher/attendance': typeof TeacherAttendanceRoute
   '/teacher/classes': typeof TeacherClassesRoute
   '/teacher/directory': typeof TeacherDirectoryRoute
+  '/teacher/modules': typeof TeacherModulesRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/staff/': typeof StaffIndexRoute
   '/student/': typeof StudentIndexRoute
   '/teacher/': typeof TeacherIndexRoute
   '/admin/modules/$slug': typeof AdminModulesSlugRoute
+  '/teacher/modules/$slug': typeof TeacherModulesSlugRoute
   '/admin/modules/': typeof AdminModulesIndexRoute
+  '/teacher/modules/': typeof TeacherModulesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -240,7 +261,9 @@ export interface FileRoutesByTo {
   '/student': typeof StudentIndexRoute
   '/teacher': typeof TeacherIndexRoute
   '/admin/modules/$slug': typeof AdminModulesSlugRoute
+  '/teacher/modules/$slug': typeof TeacherModulesSlugRoute
   '/admin/modules': typeof AdminModulesIndexRoute
+  '/teacher/modules': typeof TeacherModulesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -267,12 +290,15 @@ export interface FileRoutesById {
   '/teacher/attendance': typeof TeacherAttendanceRoute
   '/teacher/classes': typeof TeacherClassesRoute
   '/teacher/directory': typeof TeacherDirectoryRoute
+  '/teacher/modules': typeof TeacherModulesRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/staff/': typeof StaffIndexRoute
   '/student/': typeof StudentIndexRoute
   '/teacher/': typeof TeacherIndexRoute
   '/admin/modules/$slug': typeof AdminModulesSlugRoute
+  '/teacher/modules/$slug': typeof TeacherModulesSlugRoute
   '/admin/modules/': typeof AdminModulesIndexRoute
+  '/teacher/modules/': typeof TeacherModulesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -300,12 +326,15 @@ export interface FileRouteTypes {
     | '/teacher/attendance'
     | '/teacher/classes'
     | '/teacher/directory'
+    | '/teacher/modules'
     | '/admin/'
     | '/staff/'
     | '/student/'
     | '/teacher/'
     | '/admin/modules/$slug'
+    | '/teacher/modules/$slug'
     | '/admin/modules/'
+    | '/teacher/modules/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -331,7 +360,9 @@ export interface FileRouteTypes {
     | '/student'
     | '/teacher'
     | '/admin/modules/$slug'
+    | '/teacher/modules/$slug'
     | '/admin/modules'
+    | '/teacher/modules'
   id:
     | '__root__'
     | '/'
@@ -357,12 +388,15 @@ export interface FileRouteTypes {
     | '/teacher/attendance'
     | '/teacher/classes'
     | '/teacher/directory'
+    | '/teacher/modules'
     | '/admin/'
     | '/staff/'
     | '/student/'
     | '/teacher/'
     | '/admin/modules/$slug'
+    | '/teacher/modules/$slug'
     | '/admin/modules/'
+    | '/teacher/modules/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -453,6 +487,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/teacher/modules': {
+      id: '/teacher/modules'
+      path: '/modules'
+      fullPath: '/teacher/modules'
+      preLoaderRoute: typeof TeacherModulesRouteImport
+      parentRoute: typeof TeacherRoute
     }
     '/teacher/directory': {
       id: '/teacher/directory'
@@ -566,12 +607,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdmissionsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/teacher/modules/': {
+      id: '/teacher/modules/'
+      path: '/'
+      fullPath: '/teacher/modules/'
+      preLoaderRoute: typeof TeacherModulesIndexRouteImport
+      parentRoute: typeof TeacherModulesRoute
+    }
     '/admin/modules/': {
       id: '/admin/modules/'
       path: '/'
       fullPath: '/admin/modules/'
       preLoaderRoute: typeof AdminModulesIndexRouteImport
       parentRoute: typeof AdminModulesRoute
+    }
+    '/teacher/modules/$slug': {
+      id: '/teacher/modules/$slug'
+      path: '/$slug'
+      fullPath: '/teacher/modules/$slug'
+      preLoaderRoute: typeof TeacherModulesSlugRouteImport
+      parentRoute: typeof TeacherModulesRoute
     }
     '/admin/modules/$slug': {
       id: '/admin/modules/$slug'
@@ -654,10 +709,25 @@ const StudentRouteChildren: StudentRouteChildren = {
 const StudentRouteWithChildren =
   StudentRoute._addFileChildren(StudentRouteChildren)
 
+interface TeacherModulesRouteChildren {
+  TeacherModulesSlugRoute: typeof TeacherModulesSlugRoute
+  TeacherModulesIndexRoute: typeof TeacherModulesIndexRoute
+}
+
+const TeacherModulesRouteChildren: TeacherModulesRouteChildren = {
+  TeacherModulesSlugRoute: TeacherModulesSlugRoute,
+  TeacherModulesIndexRoute: TeacherModulesIndexRoute,
+}
+
+const TeacherModulesRouteWithChildren = TeacherModulesRoute._addFileChildren(
+  TeacherModulesRouteChildren,
+)
+
 interface TeacherRouteChildren {
   TeacherAttendanceRoute: typeof TeacherAttendanceRoute
   TeacherClassesRoute: typeof TeacherClassesRoute
   TeacherDirectoryRoute: typeof TeacherDirectoryRoute
+  TeacherModulesRoute: typeof TeacherModulesRouteWithChildren
   TeacherIndexRoute: typeof TeacherIndexRoute
 }
 
@@ -665,6 +735,7 @@ const TeacherRouteChildren: TeacherRouteChildren = {
   TeacherAttendanceRoute: TeacherAttendanceRoute,
   TeacherClassesRoute: TeacherClassesRoute,
   TeacherDirectoryRoute: TeacherDirectoryRoute,
+  TeacherModulesRoute: TeacherModulesRouteWithChildren,
   TeacherIndexRoute: TeacherIndexRoute,
 }
 

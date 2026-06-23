@@ -31,8 +31,10 @@ const statusBadge = (v: string) => {
 
 export function FunctionalModule({
   icon: Icon, title, subtitle, number, schema,
+  backTo = "/admin/modules", backLabel = "All Modules", totalModules = 30, aiHref = "/admin/ai",
 }: {
   icon: LucideIcon; title: string; subtitle: string; number: number; schema: ModuleSchema;
+  backTo?: string; backLabel?: string; totalModules?: number; aiHref?: string;
 }) {
   // Defensive: schema may be missing/partial during HMR or slug mismatch.
   const safeSchema: ModuleSchema = {
@@ -93,8 +95,8 @@ export function FunctionalModule({
 
   return (
     <div className="space-y-6">
-      <Link to="/admin/modules" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
-        <ArrowLeft className="h-3.5 w-3.5" /> All Modules
+      <Link to={backTo as any} className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
+        <ArrowLeft className="h-3.5 w-3.5" /> {backLabel}
       </Link>
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -103,7 +105,7 @@ export function FunctionalModule({
             <Icon className="h-7 w-7" />
           </span>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-primary">Module {number} / 30</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary">Module {number} / {totalModules}</p>
             <h1 className="font-display text-2xl font-extrabold tracking-tight sm:text-3xl">{title}</h1>
             <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{subtitle}</p>
           </div>
@@ -249,7 +251,7 @@ export function FunctionalModule({
               <li className="border-t border-border/60 pt-2 text-xs text-primary">💡 Trend looks healthy. Consider scheduling a review next week.</li>
             </ul>
             <Button asChild className="w-full bg-gradient-hero text-primary-foreground">
-              <Link to="/admin/ai">Open AI Command Center</Link>
+              <Link to={aiHref as any}>Open AI Command Center</Link>
             </Button>
           </div>
         </DialogContent>

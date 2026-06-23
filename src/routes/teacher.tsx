@@ -18,6 +18,7 @@ function TeacherLayout() {
 
   const teacherMenuItems = [
     { label: "Overview", path: "/teacher", icon: "📊" },
+    { label: "All Modules", path: "/teacher/modules", icon: "🧩" },
     { label: "Mark Attendance", path: "/teacher/attendance", icon: "✓" },
     { label: "My Classes", path: "/teacher/classes", icon: "📚" },
     { label: "Student Directory", path: "/teacher/directory", icon: "👥" },

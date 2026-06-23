@@ -31,8 +31,10 @@ const statusBadge = (v: string) => {
 
 export function FunctionalModule({
   icon: Icon, title, subtitle, number, schema,
+  backTo = "/admin/modules", backLabel = "All Modules", totalModules = 30, aiHref = "/admin/ai",
 }: {
   icon: LucideIcon; title: string; subtitle: string; number: number; schema: ModuleSchema;
+  backTo?: string; backLabel?: string; totalModules?: number; aiHref?: string;
 }) {
   // Defensive: schema may be missing/partial during HMR or slug mismatch.
   const safeSchema: ModuleSchema = {

@@ -251,7 +251,7 @@ export function FunctionalModule({
               <li className="border-t border-border/60 pt-2 text-xs text-primary">💡 Trend looks healthy. Consider scheduling a review next week.</li>
             </ul>
             <Button asChild className="w-full bg-gradient-hero text-primary-foreground">
-              <Link to="/admin/ai">Open AI Command Center</Link>
+              <Link to={aiHref as any}>Open AI Command Center</Link>
             </Button>
           </div>
         </DialogContent>

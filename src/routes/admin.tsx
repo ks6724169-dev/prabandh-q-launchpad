@@ -3,7 +3,7 @@ import {
   LayoutDashboard, FileCheck2, GraduationCap, CalendarCheck, BookOpen, NotebookPen,
   CalendarRange, Wallet, Calculator, UserCog, Briefcase, BadgeDollarSign, HeartHandshake,
   MessagesSquare, Bus, BedDouble, Library, Boxes, HeartPulse, PartyPopper, ShieldCheck,
-  Lock, BarChart3, FileText, Smartphone, Globe2, Brain, Plug, Building2,
+  Lock, BarChart3, FileText, Smartphone, Globe2, Brain, Plug, Building2, FolderKanban,
   LogOut, Menu, Search, Bell, MessageCircle, ChevronDown,
   type LucideIcon,
 } from "lucide-react";

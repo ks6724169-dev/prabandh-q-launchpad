@@ -32,6 +32,7 @@ const NAV: NavItem[] = [
   { to: "/admin/modules/homework", label: "Homework & Assignment", icon: NotebookPen },
   { to: "/admin/modules/timetable", label: "Timetable Management", icon: CalendarRange },
   { to: "/admin/modules/fees-mgmt", label: "Fee Management", icon: Wallet },
+  { to: "/admin/records", label: "Records", icon: FolderKanban },
   { to: "/admin/modules/accounting", label: "Accounting & Finance", icon: Calculator },
   { to: "/admin/modules/teachers", label: "Teacher Management", icon: UserCog },
   { to: "/admin/modules/staff-mgmt", label: "Staff Management", icon: Briefcase },

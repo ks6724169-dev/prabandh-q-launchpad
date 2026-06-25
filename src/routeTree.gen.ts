@@ -30,6 +30,7 @@ import { Route as StudentAiRouteImport } from './routes/student.ai'
 import { Route as StaffFeesRouteImport } from './routes/staff.fees'
 import { Route as StaffComplaintsRouteImport } from './routes/staff.complaints'
 import { Route as AdminStaffRouteImport } from './routes/admin.staff'
+import { Route as AdminRecordsRouteImport } from './routes/admin.records'
 import { Route as AdminPeopleRouteImport } from './routes/admin.people'
 import { Route as AdminOnboardRouteImport } from './routes/admin.onboard'
 import { Route as AdminModulesRouteImport } from './routes/admin.modules'
@@ -147,6 +148,11 @@ const AdminStaffRoute = AdminStaffRouteImport.update({
   path: '/staff',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminRecordsRoute = AdminRecordsRouteImport.update({
+  id: '/records',
+  path: '/records',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminPeopleRoute = AdminPeopleRouteImport.update({
   id: '/people',
   path: '/people',
@@ -218,6 +224,7 @@ export interface FileRoutesByFullPath {
   '/admin/modules': typeof AdminModulesRouteWithChildren
   '/admin/onboard': typeof AdminOnboardRoute
   '/admin/people': typeof AdminPeopleRoute
+  '/admin/records': typeof AdminRecordsRoute
   '/admin/staff': typeof AdminStaffRoute
   '/staff/complaints': typeof StaffComplaintsRoute
   '/staff/fees': typeof StaffFeesRoute
@@ -247,6 +254,7 @@ export interface FileRoutesByTo {
   '/admin/fees': typeof AdminFeesRoute
   '/admin/onboard': typeof AdminOnboardRoute
   '/admin/people': typeof AdminPeopleRoute
+  '/admin/records': typeof AdminRecordsRoute
   '/admin/staff': typeof AdminStaffRoute
   '/staff/complaints': typeof StaffComplaintsRoute
   '/staff/fees': typeof StaffFeesRoute
@@ -281,6 +289,7 @@ export interface FileRoutesById {
   '/admin/modules': typeof AdminModulesRouteWithChildren
   '/admin/onboard': typeof AdminOnboardRoute
   '/admin/people': typeof AdminPeopleRoute
+  '/admin/records': typeof AdminRecordsRoute
   '/admin/staff': typeof AdminStaffRoute
   '/staff/complaints': typeof StaffComplaintsRoute
   '/staff/fees': typeof StaffFeesRoute
@@ -317,6 +326,7 @@ export interface FileRouteTypes {
     | '/admin/modules'
     | '/admin/onboard'
     | '/admin/people'
+    | '/admin/records'
     | '/admin/staff'
     | '/staff/complaints'
     | '/staff/fees'
@@ -346,6 +356,7 @@ export interface FileRouteTypes {
     | '/admin/fees'
     | '/admin/onboard'
     | '/admin/people'
+    | '/admin/records'
     | '/admin/staff'
     | '/staff/complaints'
     | '/staff/fees'
@@ -379,6 +390,7 @@ export interface FileRouteTypes {
     | '/admin/modules'
     | '/admin/onboard'
     | '/admin/people'
+    | '/admin/records'
     | '/admin/staff'
     | '/staff/complaints'
     | '/staff/fees'
@@ -558,6 +570,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminStaffRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/records': {
+      id: '/admin/records'
+      path: '/records'
+      fullPath: '/admin/records'
+      preLoaderRoute: typeof AdminRecordsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/people': {
       id: '/admin/people'
       path: '/people'
@@ -660,6 +679,7 @@ interface AdminRouteChildren {
   AdminModulesRoute: typeof AdminModulesRouteWithChildren
   AdminOnboardRoute: typeof AdminOnboardRoute
   AdminPeopleRoute: typeof AdminPeopleRoute
+  AdminRecordsRoute: typeof AdminRecordsRoute
   AdminStaffRoute: typeof AdminStaffRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -672,6 +692,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminModulesRoute: AdminModulesRouteWithChildren,
   AdminOnboardRoute: AdminOnboardRoute,
   AdminPeopleRoute: AdminPeopleRoute,
+  AdminRecordsRoute: AdminRecordsRoute,
   AdminStaffRoute: AdminStaffRoute,
   AdminIndexRoute: AdminIndexRoute,
 }

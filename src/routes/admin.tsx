@@ -3,7 +3,7 @@ import {
   LayoutDashboard, FileCheck2, GraduationCap, CalendarCheck, BookOpen, NotebookPen,
   CalendarRange, Wallet, Calculator, UserCog, Briefcase, BadgeDollarSign, HeartHandshake,
   MessagesSquare, Bus, BedDouble, Library, Boxes, HeartPulse, PartyPopper, ShieldCheck,
-  Lock, BarChart3, FileText, Smartphone, Globe2, Brain, Plug, Building2,
+  Lock, BarChart3, FileText, Smartphone, Globe2, Brain, Plug, Building2, FolderKanban,
   LogOut, Menu, Search, Bell, MessageCircle, ChevronDown,
   type LucideIcon,
 } from "lucide-react";
@@ -32,6 +32,7 @@ const NAV: NavItem[] = [
   { to: "/admin/modules/homework", label: "Homework & Assignment", icon: NotebookPen },
   { to: "/admin/modules/timetable", label: "Timetable Management", icon: CalendarRange },
   { to: "/admin/modules/fees-mgmt", label: "Fee Management", icon: Wallet },
+  { to: "/admin/records", label: "Records", icon: FolderKanban },
   { to: "/admin/modules/accounting", label: "Accounting & Finance", icon: Calculator },
   { to: "/admin/modules/teachers", label: "Teacher Management", icon: UserCog },
   { to: "/admin/modules/staff-mgmt", label: "Staff Management", icon: Briefcase },
